@@ -93,7 +93,7 @@ public class UsersTableController extends HttpServlet implements SwitchActionCon
 		
 		UserDao dao = DaoFactory.getInstance().getUserDao();
 
-		// if all fields filled correctly
+		// all fields filled correctly
 		// select users with such id or name or password
 		if (idIsValid(id) && loginIsValidForSearch(name) && emailIsValidForSearch(email)) {
 			try {
@@ -159,7 +159,7 @@ public class UsersTableController extends HttpServlet implements SwitchActionCon
 				return;
 			}
 		}
-		// input isn't valid
+		// invalid input 
 		else{
 			setResultMessageGoForward(RESULT_MESSAGE_INVALID_INPUT_FOR_SEARCH, PAGE_USERS, request, response);
 			return;

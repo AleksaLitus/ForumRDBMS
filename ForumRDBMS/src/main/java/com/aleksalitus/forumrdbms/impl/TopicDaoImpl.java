@@ -120,7 +120,8 @@ public class TopicDaoImpl extends DaoImpl<Topic> implements TopicDao {
 			statement.setInt(4, topic.getMessagesCount());
 			statement.executeUpdate();
 			connection.commit();
-			// topic was deleted, now delete all messages with deleted_topic's id (if topic has messages)
+			// topic was deleted, now delete all messages with deleted_topic's id 
+			// (if topic has messages)
 			MessageDaoImpl messageDao = DaoFactory.getInstance().getMessageDao();
 			if(messageDao.selectByTopicId(topic.getId()) != null && !messageDao.selectByTopicId(topic.getId()).isEmpty()){
 				messageDao.deleteMessagesByTopicId(topic.getId());

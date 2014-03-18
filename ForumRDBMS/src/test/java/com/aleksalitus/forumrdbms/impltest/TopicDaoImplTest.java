@@ -8,6 +8,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import com.aleksalitus.forumrdbms.dao.TopicDao;
+import com.aleksalitus.forumrdbms.entity.Message;
 import com.aleksalitus.forumrdbms.entity.Topic;
 import com.aleksalitus.forumrdbms.exception.DBSystemException;
 import com.aleksalitus.forumrdbms.exception.NotUniquePropertyException;
@@ -29,29 +30,40 @@ public class TopicDaoImplTest {
 	@Test
 	public void testInsertUniqueAndDelete() throws DBSystemException {
 
-		TopicDao userDao = DaoFactory.getInstance().getTopicDao();
-		Topic newTopic = createRandomTopic();
+		TopicDao topicDao = DaoFactory.getInstance().getTopicDao();
+		Topic randomTopic = createRandomTopic();
 
 		// test insert
 		try {
-			userDao.insert(newTopic);
+			topicDao.insert(randomTopic);
 		} catch (NotUniquePropertyException e) {
 			fail("try again");
 		}
 
-		List<Topic> topics = userDao.selectByTopicName(newTopic.getName());
+		List<Topic> topics = topicDao.selectByTopicName(randomTopic.getName());
 
 		assertNotNull(topics);
 		assertTrue(topics.size() == 1);
 
 		Topic insertedTopic = topics.get(0);
 
-		assertTrue(insertedTopic.getName().equals(newTopic.getName()));
-		assertTrue(insertedTopic.getAuthorId() == newTopic.getAuthorId());
+		assertTrue(insertedTopic.getName().equals(randomTopic.getName()));
+		assertTrue(insertedTopic.getAuthorId() == randomTopic.getAuthorId());
+		
+		// add message to this topic
+		Message message = createRandomMessage(insertedTopic.getId());
+		try {
+			DaoFactory.getInstance().getMessageDao().insert(message);
+		} catch (NotUniquePropertyException e) {
+			fail("try again");
+		}
+		
+		//TODO
+		//test delete
+		topicDao.delete(insertedTopic);
 
-		userDao.delete(insertedTopic);
-
-		assertNull(userDao.selectByTopicId(insertedTopic.getId()));
+		assertNull(topicDao.selectByTopicId(insertedTopic.getId()));
+		assertNull(DaoFactory.getInstance().getMessageDao().selectByTopicId(insertedTopic.getId()));
 	}
 
 	
@@ -129,14 +141,24 @@ public class TopicDaoImplTest {
 	
 	
 	/**
-	 * @return  Topic with valid random properties and fake id (id is not used in insert method, 
-	 * but checked in selectById)
+	 * @return  Topic with valid random properties and fake id (id is not used in insert method)
 	 */
 	private Topic createRandomTopic() {
 		Random r = new Random();
-		int fakeId = 10000 + r.nextInt(999); 
+		int fakeId = 10000 + r.nextInt(9999); 
 		int authorId = topicTest1.getAuthorId(); // foreign key
 		int messagesCount = topicTest1.getMessagesCount();
 		return new Topic(fakeId, "topicName" + r.nextInt(99999), authorId, messagesCount);
+	}
+	
+	
+	/**
+	 * @return  Message with valid random properties and specified topicId and fake id (id is not used in insert method)
+	 */
+	private Message createRandomMessage(int topicId) {
+		Random r = new Random();
+		int fakeId = 10000 + r.nextInt(9999); 
+		int authorId = userTest1.getId(); // foreign key
+		return new Message(fakeId, "text" + r.nextInt(99999), authorId, topicId);
 	}
 }

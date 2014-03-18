@@ -18,7 +18,7 @@ public class MessageDaoImpl extends DaoImpl<Message> implements MessageDao {
 
 	private static final String SQL_SELECT_ALL = "SELECT * FROM Messages";
 	private static final String SQL_DELETE = "DELETE FROM Messages WHERE message_id = ? AND author_id = ? AND topic_id = ?";
-	private static final String SQL_DELETE_ALL_BY_TOPIC_ID = "DELETE FROM Messages WHERE message_id = ?";
+	private static final String SQL_DELETE_RANGE_BY_TOPIC_ID = "DELETE FROM Messages WHERE message_id = ?";
 	private static final String SQL_DELETE_ALL_BY_AUTHOR_ID = "DELETE FROM Messages WHERE author_id = ?";
 	private static final String SQL_INSERT = "INSERT INTO Messages (message_text, author_id, topic_id) VALUES (?,?,?)";
 	private static final String SQL_SELECT_BY_MESSAGE_ID =  "SELECT * FROM Messages WHERE message_id = ?";
@@ -317,14 +317,14 @@ public class MessageDaoImpl extends DaoImpl<Message> implements MessageDao {
 			connection.setAutoCommit(false);
 			// count how many messages to delete
 			deletedMessagesCount = selectByTopicId(topicId).size();
-			statement = connection.prepareStatement(SQL_DELETE_ALL_BY_TOPIC_ID);
+			statement = connection.prepareStatement(SQL_DELETE_RANGE_BY_TOPIC_ID);
 			statement.setInt(1, topicId);
 			statement.executeUpdate();
 			connection.commit();
 			success = true;
 		} catch (SQLException e) {
 			JdbcUtils.rollbackQuietly(connection);
-			throw new DBSystemException("Can't execute SQL = " + SQL_DELETE_ALL_BY_TOPIC_ID
+			throw new DBSystemException("Can't execute SQL = " + SQL_DELETE_RANGE_BY_TOPIC_ID
 					+ ", topic_id: " + topicId);
 		} finally {
 			JdbcUtils.closeResourses(connection, statement, resSet);

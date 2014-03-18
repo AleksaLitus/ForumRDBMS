@@ -2,7 +2,9 @@ package com.aleksalitus.forumrdbms.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -65,7 +67,7 @@ public class TopicsTableController extends HttpServlet implements SwitchActionCo
 			insert(name, authorId, request,response);
 		}
 		else if (action.equals(ACTION_SEARCH)) {
-			search(id,name, authorId, messagesCount,request,response);
+			search(id,name, authorId, request,response);
 		}
 		else if (action.equals(ACTION_MOST_POPULAR_TOPICS)) {
 			selectMostPopular(mostPopularCount,request,response);
@@ -184,11 +186,101 @@ public class TopicsTableController extends HttpServlet implements SwitchActionCo
 		}
 	}
 	
-	//not yet implemented
+	
+	// TODO testing!!!!!!!!!!!!!!!!!!!!!!
 	private void search(String id, String name, String authorId,
-			String messagesCount, HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException {
-		// TODO impl
-		setResultMessageGoForward("Apologies, not yet implemented.",PAGE_TOPICS,request,response);
+			HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {
+		
+		//setResultMessageGoForward("Apologies, not yet implemented.",PAGE_TOPICS,request,response);
+		int countOfFilledFields = 0;
+		if (!isEmptyOrSpacesOnly(id)) {
+			countOfFilledFields++;
+		}
+		if (!isEmptyOrSpacesOnly(name)) {
+			countOfFilledFields++;
+		}
+		if (!isEmptyOrSpacesOnly(authorId)) {
+			countOfFilledFields++;
+		}
+		
+		if (countOfFilledFields == 0 || countOfFilledFields == 2) {
+			// invalid input: must be filled 1 or 3 fields
+			setResultMessageGoForward(RESULT_MESSAGE_INVALID_INPUT_FOR_SEARCH, PAGE_USERS,request, response);
+			return;
+		}
+		
+		TopicDao dao = DaoFactory.getInstance().getTopicDao();
+
+		// all fields filled correctly
+		// select topics with such id or name or author id or messages count
+		if (idIsValid(id) && loginIsValidForSearch(name) && idIsValid(authorId)) {
+			try {
+				Set<Topic> resultList = new HashSet<>();
+				Topic selectedById = dao.selectByTopicId(Integer.valueOf(id));
+				if(selectedById != null){
+					resultList.add(selectedById);
+				}
+				resultList.addAll(dao.selectByTopicName(name));
+				resultList.addAll(dao.selectByAuthorId(Integer.valueOf(authorId)));
+				
+				request.getSession().setAttribute(ATTRIBUTE_MODEL_TOPICS_TO_VIEW, resultList);
+				setResultMessageGoForward(RESULT_MESSAGE_SUCCESS_SELECT, PAGE_TOPICS, request, response);
+				return;
+			} catch (NumberFormatException e) {
+				setResultMessageGoForward(RESULT_MESSAGE_INVALID_INPUT_FOR_SEARCH, PAGE_TOPICS, request, response);
+				return;
+			} catch (DBSystemException e) {
+				setResultMessageGoForward(RESULT_MESSAGE_DB_ERROR, PAGE_TOPICS,request, response);
+				return;
+			}
+		}
+		// select By Id only
+		else if (idIsValid(id) && name.isEmpty() && authorId.isEmpty()) {
+			try {
+				Topic selectedById = dao.selectByTopicId(Integer.valueOf(id));
+				List<Topic> result = new ArrayList<>(0);
+				result.add(selectedById);
+				request.getSession().setAttribute(ATTRIBUTE_MODEL_TOPICS_TO_VIEW, result);
+				setResultMessageGoForward(RESULT_MESSAGE_SUCCESS_SELECT, PAGE_TOPICS, request, response);
+				return;
+			} catch (NumberFormatException e) {
+				setResultMessageGoForward(RESULT_MESSAGE_INVALID_INPUT_FOR_SEARCH,PAGE_TOPICS, request, response);
+				return;
+			} catch (DBSystemException e) {
+				setResultMessageGoForward(RESULT_MESSAGE_DB_ERROR, PAGE_TOPICS,request, response);
+				return;
+			}
+		}
+		// select By Name only
+		else if (lengthIsValid(name, 1, 50) && id.isEmpty() && authorId.isEmpty()) {
+			try {
+				
+				List<Topic> result = dao.selectByTopicName(name);
+				request.getSession().setAttribute(ATTRIBUTE_MODEL_TOPICS_TO_VIEW, result);
+				setResultMessageGoForward(RESULT_MESSAGE_SUCCESS_SELECT, PAGE_TOPICS, request, response);
+				return;
+			} catch (DBSystemException e) {
+				setResultMessageGoForward(RESULT_MESSAGE_DB_ERROR, PAGE_TOPICS,request, response);
+				return;
+			}
+		}
+		// select By authorId only
+		else if (idIsValid(authorId) && id.isEmpty() && name.isEmpty()) {
+			try {
+
+				List<Topic> result = dao.selectByAuthorId(Integer.valueOf(authorId));
+				request.getSession().setAttribute(ATTRIBUTE_MODEL_TOPICS_TO_VIEW,result);
+				setResultMessageGoForward(RESULT_MESSAGE_SUCCESS_SELECT, PAGE_TOPICS, request, response);
+				return;
+			} catch (DBSystemException e) {
+				setResultMessageGoForward(RESULT_MESSAGE_DB_ERROR, PAGE_TOPICS,request, response);
+				return;
+			}
+		}
+		// invalid input 
+		else{
+			setResultMessageGoForward(RESULT_MESSAGE_INVALID_INPUT_FOR_SEARCH, PAGE_TOPICS, request, response);
+			return;
+		}
 	}
 }

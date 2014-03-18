@@ -27,8 +27,7 @@ public class TopicsTableFilter extends BaseFilter implements Filter {
 
 		String actionWithData = request.getParameter(PARAMETER_ACTION);
 
-		if (actionWithData.equals(ACTION_DELETE)
-				|| actionWithData.equals(ACTION_SEARCH)) {
+		if (actionWithData.equals(ACTION_DELETE)) {
 
 			// text boxes required
 			request.setAttribute(TOPIC_ID, true);
@@ -49,6 +48,17 @@ public class TopicsTableFilter extends BaseFilter implements Filter {
 			request.setAttribute(TOPIC_ID, false);
 			request.setAttribute(TOPIC_MESSAGES_COUNT, false);
 			request.setAttribute(TOPIC_MOST_POPULAR_COUNT_TO_VIEW, false);
+			
+		} else if (actionWithData.equals(ACTION_SEARCH)) {
+
+			// text boxes required
+			request.setAttribute(TOPIC_ID, true);
+			request.setAttribute(TOPIC_NAME, true);
+			request.setAttribute(TOPIC_AUTHOR_ID, true);
+			
+			// not required
+			request.setAttribute(TOPIC_MOST_POPULAR_COUNT_TO_VIEW, false);
+			request.setAttribute(TOPIC_MESSAGES_COUNT, false);
 			
 		} else if (actionWithData.equals(ACTION_MOST_POPULAR_TOPICS)) {
 

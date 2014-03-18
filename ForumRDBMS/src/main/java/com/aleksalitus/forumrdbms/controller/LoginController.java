@@ -48,11 +48,12 @@ public class LoginController extends HttpServlet {
 		doActions(request,response);
 	}
 	
-	@Override
-	protected void doGet(HttpServletRequest request,
-			HttpServletResponse response) throws ServletException, IOException{
-		doActions(request,response);
-	}
+	//TODO
+//	@Override
+//	protected void doGet(HttpServletRequest request,
+//			HttpServletResponse response) throws ServletException, IOException{
+//		doActions(request,response);
+//	}
 
 
 	private void doActions(HttpServletRequest request,
@@ -106,7 +107,8 @@ public class LoginController extends HttpServlet {
 				// admin's login and password recognized
 				// do login (put admin's login into session) 
 			    // go to main page
-				request.getSession().setAttribute(ATTRIBUTE_ADMIN, admin.getLogin());
+				//request.getSession().setAttribute(ATTRIBUTE_ADMIN, admin.getLogin());
+				request.getSession().setAttribute(ATTRIBUTE_ADMIN, request.getParameter("buttonName"));
 				response.sendRedirect(PAGE_MAIN);
 				//logger.trace("admin's login and password recognized. go to main page");
 				return;

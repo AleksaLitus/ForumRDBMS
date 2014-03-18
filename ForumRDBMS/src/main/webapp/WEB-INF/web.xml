@@ -33,10 +33,6 @@
   </filter>
   <filter-mapping>
     <filter-name>securityFilter</filter-name>
-    <url-pattern>/main.do</url-pattern>
-  </filter-mapping>
-  <filter-mapping>
-    <filter-name>securityFilter</filter-name>
     <url-pattern>/admins.do</url-pattern>
   </filter-mapping>
   <filter-mapping>
